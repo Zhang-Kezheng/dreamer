@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.util.Objects;
 
 @Configuration
-@EnableGlobalMethodSecurity(prePostEnabled=true)
 public class SecurityConfiguration    {
     @Resource
     private SecurityConfig securityConfig;
