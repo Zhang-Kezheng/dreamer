@@ -8,3 +8,4 @@ dreamer:
   security:
     secret-key: abcdefg
     none-security-url-patterns: /test/login
+    token-cache-mode: redis

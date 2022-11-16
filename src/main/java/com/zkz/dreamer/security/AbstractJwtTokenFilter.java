@@ -1,6 +1,8 @@
 package com.zkz.dreamer.security;
 
+import org.springframework.web.filter.OncePerRequestFilter;
+
 import javax.servlet.Filter;
 
-public interface  AbstractJwtTokenFilter extends Filter {
+public abstract class AbstractJwtTokenFilter  extends OncePerRequestFilter implements Filter {
 }

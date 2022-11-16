@@ -1,9 +1,9 @@
 package com.zkz.dreamer.response;
 
 import cn.hutool.core.util.CharsetUtil;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zkz.dreamer.exception.BaseException;
-import com.zkz.dreamer.util.GsonUtils;
 import lombok.Data;
 
 import javax.servlet.http.HttpServletResponse;
@@ -71,7 +71,7 @@ public class ResponseData {
         response.setCharacterEncoding(CharsetUtil.UTF_8);
         response.setContentType("application/json");
         ResponseData failed = ResponseData.failed(baseException);
-        response.getOutputStream().write(GsonUtils.toJson(failed).getBytes());
+        response.getOutputStream().write(JSON.toJSONString(failed).getBytes());
     }
 
 }

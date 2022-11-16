@@ -1,19 +1,22 @@
 package com.zkz.dreamer.cache;
 
 import com.zkz.dreamer.exception.TokenException;
+import com.zkz.dreamer.security.SecurityConfig;
 import com.zkz.dreamer.security.SystemUser;
 import com.zkz.dreamer.security.Token;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class TokenCacheManage {
     @Resource
     private AbstractTokenCache abstractTokenCache;
-
+    @Resource
+    private SecurityConfig securityConfig;
     public void putToken(SystemUser systemUser){
-        abstractTokenCache.put(systemUser);
+        abstractTokenCache.put(systemUser,securityConfig.getTimeout(),securityConfig.getTimeUnit());
     }
 
     public SystemUser get(String id){

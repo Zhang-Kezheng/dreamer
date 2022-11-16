@@ -44,7 +44,7 @@ public class LogAspect {
     public Object timeCount(ProceedingJoinPoint pjp) throws Throwable {
         long time = System.currentTimeMillis();
         Object result=pjp.proceed();
-        log.info("{} {} {}; process: {}ms;  params: {}",request.getMethod(), request.getRequestURL(), RequestUtils.getIp(request), System.currentTimeMillis() - time,pjp.getArgs());
+        log.info("{} {} {}; process: {}ms;  params: {};  result: {}",request.getMethod(), request.getRequestURL(), RequestUtils.getIp(request), System.currentTimeMillis() - time,pjp.getArgs(),result.toString());
         return result;
     }
 

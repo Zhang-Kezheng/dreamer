@@ -7,13 +7,14 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-@ConditionalOnProperty(prefix = "dreamer.security",value = "tokenCacheMode",havingValue = "MEMORY",matchIfMissing = true)
+@ConditionalOnProperty(prefix = "dreamer.security",value = "token-cache-mode",havingValue = "memory",matchIfMissing = true)
 @Component
 public class MemoryTokenCache implements AbstractTokenCache {
-    private final Map<String, SystemUser> systemUserMap=new HashMap<>();
+    private final MapCacheComponent<String, SystemUser> systemUserMap=new MapCacheComponent<>();
     @Override
-    public void put(SystemUser systemUser) {
+    public void put(SystemUser systemUser, long timeout, TimeUnit timeUnit) {
         systemUserMap.put(systemUser.getId(),systemUser);
     }
 
@@ -24,6 +25,6 @@ public class MemoryTokenCache implements AbstractTokenCache {
 
     @Override
     public boolean containToken(SystemUser systemUser) {
-        return systemUserMap.containsKey(systemUser.getId());
+        return systemUserMap.get(systemUser.getId())!=null;
     }
 }

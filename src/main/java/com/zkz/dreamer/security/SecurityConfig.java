@@ -5,6 +5,8 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.TimeUnit;
+
 @Component
 @Data
 @ConfigurationProperties("dreamer.security")
@@ -19,7 +21,9 @@ public class SecurityConfig {
 
     private String tokenHeader = "access-token";
 
-    private int survivalMinutes=60;
+    private int timeout=60;
+
+    private TimeUnit timeUnit=TimeUnit.MINUTES;
 
     private String secretKey;
 }

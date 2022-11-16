@@ -2,9 +2,9 @@ package com.zkz.dreamer.jwt;
 
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.zkz.dreamer.cache.TokenCacheManage;
-import com.zkz.dreamer.exception.DreamerException;
 import com.zkz.dreamer.exception.TokenException;
 import com.zkz.dreamer.security.SecurityConfig;
 import com.zkz.dreamer.security.SystemUser;
@@ -20,7 +20,6 @@ import java.util.Optional;
 
 import com.zkz.dreamer.security.Token;
 import com.zkz.dreamer.security.UserInfoService;
-import com.zkz.dreamer.util.GsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,12 +44,12 @@ public class JwtUtils {
             header.put("typ", "JWT");
             Token token=new Token();
             token.setId(systemUser.getId());
-            Builder builder = JWT.create().withHeader(header).withClaim("data", GsonUtils.toJson(token)).withIssuedAt(nowTime);
-            if (securityConfig.getSurvivalMinutes()>0){
-                Date expiresTime = DateUtil.offset(new Date(), DateField.MINUTE,securityConfig.getSurvivalMinutes());
+            Builder builder = JWT.create().withHeader(header).withClaim("data", JSON.toJSONString(token)).withIssuedAt(nowTime);
+            if (securityConfig.getTimeout()>0){
+                Date expiresTime = DateUtil.offset(new Date(), DateField.MINUTE,securityConfig.getTimeout());
                 builder.withExpiresAt(expiresTime);
             }else {
-                throw new DreamerException("过期时间应当大于0");
+                throw new TokenException("过期时间应当大于0");
             }
             return builder.sign(getAlgorithm());
         }
@@ -60,13 +59,15 @@ public class JwtUtils {
         if (!StringUtils.isBlank(jwtStr)) {
             try {
                 String jsonToken = JWT.require(getAlgorithm()).build().verify(jwtStr).getClaim("data").as(String.class);
-                Token token = GsonUtils.fromJson(jsonToken, Token.class);
+                Token token = JSON.parseObject(jsonToken, Token.class);
                 return tokenCacheManage.get(token.getId());
             } catch (TokenExpiredException tokenExpiredException) {
                 throw new TokenException("token过期");
             } catch (JWTVerificationException jwtVerificationException) {
+                jwtVerificationException.printStackTrace();
                 throw new TokenException("token验证失败");
             } catch (Exception e) {
+                e.printStackTrace();
                 throw new TokenException("token异常");
             }
         }
