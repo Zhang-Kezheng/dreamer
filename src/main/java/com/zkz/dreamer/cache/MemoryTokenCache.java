@@ -1,7 +1,6 @@
 package com.zkz.dreamer.cache;
 
 import com.zkz.dreamer.security.SystemUser;
-import com.zkz.dreamer.security.Token;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 

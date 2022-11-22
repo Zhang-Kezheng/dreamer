@@ -12,7 +12,9 @@ import com.zkz.dreamer.response.ResponseData;
 import com.zkz.dreamer.cache.TokenCacheManage;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.AntPathMatcher;
 
 import javax.annotation.Resource;
@@ -48,8 +50,13 @@ public class DefaultJwtTokenFilter extends  AbstractJwtTokenFilter {
         if (StrUtil.isNotEmpty(tokenStr)) {
             SystemUser systemUser = JwtUtils.verify(tokenStr);
             if (ObjectUtil.isNotNull(systemUser)){
-                tokenCacheManage.checkToken(systemUser);
-                loginContext.put(systemUser);
+                tokenCacheManage.check(systemUser);
+                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+                        new UsernamePasswordAuthenticationToken(
+                                systemUser.getUser(),
+                                null,
+                                systemUser.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
             }
         }
         filterChain.doFilter(request, response);

@@ -17,9 +17,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import com.zkz.dreamer.security.Token;
-import com.zkz.dreamer.security.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -44,13 +44,16 @@ public class JwtUtils {
             header.put("typ", "JWT");
             Token token=new Token();
             token.setId(systemUser.getId());
+            token.setAuthTime(System.currentTimeMillis());
             Builder builder = JWT.create().withHeader(header).withClaim("data", JSON.toJSONString(token)).withIssuedAt(nowTime);
-            if (securityConfig.getTimeout()>0){
-                Date expiresTime = DateUtil.offset(new Date(), DateField.MINUTE,securityConfig.getTimeout());
-                builder.withExpiresAt(expiresTime);
-            }else {
+            if (securityConfig.getTimeout()<=0){
                 throw new TokenException("过期时间应当大于0");
+
             }
+            Date expiresTime = DateUtil.offset(new Date(), DateField.MINUTE,securityConfig.getTimeout());
+            builder.withExpiresAt(expiresTime);
+            long l = TimeUnit.MINUTES.toMillis(securityConfig.getTimeout());
+            token.setExpireTime(l+token.getAuthTime());
             return builder.sign(getAlgorithm());
         }
     }
@@ -60,6 +63,9 @@ public class JwtUtils {
             try {
                 String jsonToken = JWT.require(getAlgorithm()).build().verify(jwtStr).getClaim("data").as(String.class);
                 Token token = JSON.parseObject(jsonToken, Token.class);
+                if (token.getExpireTime()>System.currentTimeMillis()){
+                    throw new TokenException("token过期");
+                }
                 return tokenCacheManage.get(token.getId());
             } catch (TokenExpiredException tokenExpiredException) {
                 throw new TokenException("token过期");

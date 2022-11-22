@@ -4,6 +4,7 @@ import com.zkz.dreamer.exception.GlobalExceptionRegister;
 import com.zkz.dreamer.log.LogAspectRegister;
 import com.zkz.dreamer.security.WebSecurityRegister;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 
 import java.lang.annotation.*;
 
@@ -16,4 +17,5 @@ public @interface EnableDreamer {
     boolean enableLogAspect() default true;
     boolean enableWebSecurity() default true;
     boolean enableGlobalExceptionHandler() default true;
+    boolean enableGlobalMethodSecurity() default true;
 }

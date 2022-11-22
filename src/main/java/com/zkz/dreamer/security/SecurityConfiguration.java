@@ -3,6 +3,7 @@ package com.zkz.dreamer.security;
 import com.zkz.dreamer.exception.AuthException;
 import com.zkz.dreamer.util.SpringContextUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +13,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -27,13 +29,14 @@ import java.io.IOException;
 import java.util.Objects;
 
 @Configuration
-public class SecurityConfiguration    {
+public class SecurityConfiguration  {
     @Resource
     private SecurityConfig securityConfig;
     @Resource
     private ApplicationContext applicationContext;
     @Bean
     @Order(1)
+    @ConditionalOnMissingBean(WebSecurityConfigurerAdapter.class)
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf().disable();
         //开启跨域访问
@@ -57,13 +60,6 @@ public class SecurityConfiguration    {
             return applicationContext.getBean(DefaultJwtTokenFilter.class);
         });
         http.addFilterBefore(abstractJwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
-
-        //用户详情service
-        AbstractUserDetailService abstractUserDetailService = applicationContext.getBeansOfType(AbstractUserDetailService.class).values().stream().filter(Objects::nonNull).findFirst().orElseGet(() -> {
-            SpringContextUtils.register(beanDefinitionRegistry,DefaultUserDetailsService.class);
-            return applicationContext.getBean(DefaultUserDetailsService.class);
-        });
-        http.userDetailsService(abstractUserDetailService);
 
         //全局不创建session
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
